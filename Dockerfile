@@ -1,5 +1,5 @@
 # Bases for building and running the app
-FROM golang:1.26-alpine AS builder-base
+FROM golang:1.27-alpine AS builder-base
 WORKDIR /go/src/github.com/m-butterfield/mattbutterfield.com
 COPY go.* ./
 RUN go mod download
