@@ -6,30 +6,18 @@ import (
 )
 
 type Image struct {
-	ID         string    `gorm:"type:varchar(128)"`
-	PreviewID  string    `gorm:"type:varchar(128);not null"`
-	Caption    string    `gorm:"type:text"`
-	Location   string    `gorm:"type:text"`
-	Width      int       `gorm:"type:integer;not null"`
-	Height     int       `gorm:"type:integer;not null"`
-	CreatedAt  time.Time `gorm:"not null;default:now();index"`
-	Camera     string    `gorm:"type:text"`
-	Lens       string    `gorm:"type:text"`
-	Film       string    `gorm:"type:text"`
-	ImageTypes []ImageType
-	Tags       []Tag `gorm:"many2many:image_tags;"`
+	ID        string    `gorm:"type:varchar(128)"`
+	PreviewID string    `gorm:"type:varchar(128);not null"`
+	Caption   string    `gorm:"type:text"`
+	Location  string    `gorm:"type:text"`
+	Width     int       `gorm:"type:integer;not null"`
+	Height    int       `gorm:"type:integer;not null"`
+	CreatedAt time.Time `gorm:"not null;default:now();index"`
+	Camera    string    `gorm:"type:text"`
+	Lens      string    `gorm:"type:text"`
+	Film      string    `gorm:"type:text"`
+	Tags      []Tag     `gorm:"many2many:image_tags;"`
 }
-
-type ImageType struct {
-	ImageID string        `gorm:"primarykey;not null"`
-	Type    ImageTypeName `gorm:"primarykey;type:varchar(128);not null"`
-}
-
-type ImageTypeName string
-
-const (
-	PhotoADayImageType ImageTypeName = "photo-a-day"
-)
 
 func (s *ds) GetImage(id string) (*Image, error) {
 	image := &Image{}
@@ -44,22 +32,6 @@ func (s *ds) GetImages(before time.Time, limit int) ([]*Image, error) {
 	var images []*Image
 	tx := s.db.
 		Where("created_at < $1", before).
-		Order("created_at DESC").
-		Limit(limit).
-		Find(&images)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	return images, nil
-}
-
-func (s *ds) GetYearImages(year int, before time.Time, limit int) ([]*Image, error) {
-	var images []*Image
-	tx := s.db.
-		Joins("JOIN image_types it ON it.image_id = images.id").
-		Where("it.type = ?", PhotoADayImageType).
-		Where("created_at < ?", before).
-		Where("date_part('year', created_at) = ?", year).
 		Order("created_at DESC").
 		Limit(limit).
 		Find(&images)
@@ -87,9 +59,6 @@ func (s *ds) SaveImage(image *Image) error {
 
 func (s *ds) DeleteImage(id string) error {
 	return s.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("image_id = ?", id).Delete(&ImageType{}).Error; err != nil {
-			return err
-		}
 		if err := tx.Model(&Image{ID: id}).Association("Tags").Clear(); err != nil {
 			return err
 		}

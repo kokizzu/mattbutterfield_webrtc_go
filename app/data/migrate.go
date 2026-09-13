@@ -13,7 +13,6 @@ func Migrate() error {
 	}
 	err = s.db.AutoMigrate(
 		&Image{},
-		&ImageType{},
 		&Tag{},
 		&StravaAccessToken{},
 		&StravaActivity{},

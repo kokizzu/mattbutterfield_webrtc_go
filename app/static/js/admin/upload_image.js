@@ -17,7 +17,6 @@ document.querySelector("#upload-button").addEventListener("click", async functio
     alert("Please provide a created date.");
     return;
   }
-  const imageType = document.querySelector("#image-type").value;
 
   disableForm();
 
@@ -35,7 +34,6 @@ document.querySelector("#upload-button").addEventListener("click", async functio
     createdDate: createdDate,
     caption: document.querySelector("#caption").value,
     location: document.querySelector("#location").value,
-    imageType: imageType,
     camera: document.querySelector("#camera").value,
     lens: document.querySelector("#lens").value,
     film: document.querySelector("#film").value,

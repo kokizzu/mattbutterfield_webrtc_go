@@ -8,8 +8,7 @@ import (
 
 type uploadPage struct {
 	*basePage
-	ImageTypes []data.ImageTypeName
-	Tags       []*data.Tag
+	Tags []*data.Tag
 }
 
 func uploadImage(c *gin.Context) {
@@ -21,10 +20,7 @@ func uploadImage(c *gin.Context) {
 
 	body, err := templateRender("admin/upload_image", uploadPage{
 		basePage: makeBasePage(c),
-		ImageTypes: []data.ImageTypeName{
-			data.PhotoADayImageType,
-		},
-		Tags: tags,
+		Tags:     tags,
 	})
 	if err != nil {
 		lib.InternalError(err, c)

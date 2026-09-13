@@ -67,13 +67,6 @@ func saveImage(c *gin.Context) {
 		return
 	}
 
-	var imageTypes []data.ImageType
-	if body.ImageType != "" {
-		imageTypes = append(imageTypes, data.ImageType{
-			Type: body.ImageType,
-		})
-	}
-
 	var tags []data.Tag
 	for _, tagName := range body.Tags {
 		if tagName != "" {
@@ -82,18 +75,17 @@ func saveImage(c *gin.Context) {
 	}
 
 	if err = ds.SaveImage(&data.Image{
-		ID:         fileName,
-		PreviewID:  previewID,
-		Caption:    body.Caption,
-		Location:   body.Location,
-		Width:      size.Width,
-		Height:     size.Height,
-		ImageTypes: imageTypes,
-		Tags:       tags,
-		CreatedAt:  body.CreatedDate.Time,
-		Camera:     body.Camera,
-		Lens:       body.Lens,
-		Film:       body.Film,
+		ID:        fileName,
+		PreviewID: previewID,
+		Caption:   body.Caption,
+		Location:  body.Location,
+		Width:     size.Width,
+		Height:    size.Height,
+		Tags:      tags,
+		CreatedAt: body.CreatedDate.Time,
+		Camera:    body.Camera,
+		Lens:      body.Lens,
+		Film:      body.Film,
 	}); err != nil {
 		lib.InternalError(err, c)
 		return

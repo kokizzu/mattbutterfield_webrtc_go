@@ -15,7 +15,6 @@ type editImagePage struct {
 	*basePage
 	*imageInfo
 	AllTags    []*data.Tag
-	ImageTypes []data.ImageTypeName
 	TagsInput  string
 	EditCamera string
 	EditLens   string
@@ -64,12 +63,9 @@ func editImage(c *gin.Context) {
 	}
 
 	body, err := templateRender("admin/edit_image", &editImagePage{
-		basePage:  makeBasePage(c),
-		imageInfo: getImageInfo(image),
-		AllTags:   allTags,
-		ImageTypes: []data.ImageTypeName{
-			data.PhotoADayImageType,
-		},
+		basePage:   makeBasePage(c),
+		imageInfo:  getImageInfo(image),
+		AllTags:    allTags,
 		TagsInput:  strings.Join(tagNames, ", "),
 		EditCamera: image.Camera,
 		EditLens:   image.Lens,
