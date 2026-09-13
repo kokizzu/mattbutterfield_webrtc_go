@@ -1,7 +1,9 @@
 {{ template "base" . }}
 {{ define "head" }}{{ end }}
 {{ define "main" }}
+{{ if .LoggedIn }}<a href="{{ .OriginalImageURL }}" style="display: contents">{{ end }}
 {{ template "image" . }}
+{{ if .LoggedIn }}</a>{{ end }}
 <div class="section-div">
   <p>{{ .ImageCaption }}</p>
   <p>{{ .ImageLocation }}</p>

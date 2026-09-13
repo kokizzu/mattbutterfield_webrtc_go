@@ -9,5 +9,5 @@ const (
 	MusicBaseURL  = FilesBaseURL + MusicPrefix
 	UploadsPrefix = "uploads/"
 	MusicPrefix   = "music/"
-	HomeImage     = "67f212474c31d649bd42da253b45ccd32cde6c52c1b72132a3f827c8a371eb73.jpg"
+	HomeImage     = "6b132935b4d4ec03e56e1bf929f71dbf174922691406c3c522449c657807a75b.jpg"
 )
