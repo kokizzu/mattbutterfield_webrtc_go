@@ -1,10 +1,10 @@
 package tasks
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"fmt"
-	_ "image/jpeg"
 	"io"
 	"log"
 	"math"
@@ -43,31 +43,26 @@ func saveImage(c *gin.Context) {
 
 	upload := client.Bucket(lib.FilesBucket).Object(lib.UploadsPrefix + body.ImageFileName)
 
-	size, imgData, err := processImage(ctx, upload)
+	originalData, err := readImage(ctx, upload)
 	if err != nil {
 		lib.InternalError(err, c)
 		return
 	}
 
-	hash, err := getHash(imgData)
+	size, previewData, err := processImage(originalData)
 	if err != nil {
 		lib.InternalError(err, c)
 		return
 	}
-	fileName := hash + ".jpg"
 
-	result := client.Bucket(lib.ImagesBucket).Object(hash + ".jpg")
-	w := result.NewWriter(ctx)
-	w.ContentType = "image/jpeg"
-	if _, err = w.Write(imgData); err != nil {
+	images := client.Bucket(lib.ImagesBucket)
+	fileName, err := saveImageFile(ctx, images, originalData)
+	if err != nil {
 		lib.InternalError(err, c)
 		return
 	}
-	if err = w.Close(); err != nil {
-		lib.InternalError(err, c)
-		return
-	}
-	if err := upload.Delete(ctx); err != nil {
+	previewID, err := saveImageFile(ctx, images, previewData)
+	if err != nil {
 		lib.InternalError(err, c)
 		return
 	}
@@ -88,6 +83,7 @@ func saveImage(c *gin.Context) {
 
 	if err = ds.SaveImage(&data.Image{
 		ID:         fileName,
+		PreviewID:  previewID,
 		Caption:    body.Caption,
 		Location:   body.Location,
 		Width:      size.Width,
@@ -102,25 +98,48 @@ func saveImage(c *gin.Context) {
 		lib.InternalError(err, c)
 		return
 	}
+	if err := upload.Delete(ctx); err != nil {
+		// The image is saved; a cleanup failure must not retry the database insert.
+		log.Println(err)
+	}
 }
 
-func processImage(ctx context.Context, obj *storage.ObjectHandle) (*bimg.ImageSize, []byte, error) {
+func saveImageFile(ctx context.Context, bucket *storage.BucketHandle, imgData []byte) (string, error) {
+	hash, err := getHash(imgData)
+	if err != nil {
+		return "", err
+	}
+	fileName := hash + ".jpg"
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	w := bucket.Object(fileName).NewWriter(ctx)
+	w.ContentType = "image/jpeg"
+	if _, err := w.Write(imgData); err != nil {
+		return "", err
+	}
+	if err := w.Close(); err != nil {
+		return "", err
+	}
+	return fileName, nil
+}
+
+func readImage(ctx context.Context, obj *storage.ObjectHandle) ([]byte, error) {
 	reader, err := obj.NewReader(ctx)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	defer func(reader *storage.Reader) {
 		if err := reader.Close(); err != nil {
 			log.Println(err)
 		}
 	}(reader)
-	buffer, err := io.ReadAll(reader)
-	if err != nil {
-		return nil, nil, err
-	}
+	return io.ReadAll(reader)
+}
 
-	img := bimg.NewImage(buffer)
-	if _, err = img.AutoRotate(); err != nil {
+func processImage(buffer []byte) (*bimg.ImageSize, []byte, error) {
+	// Keep the uploaded bytes intact, including metadata, for original storage.
+	img := bimg.NewImage(bytes.Clone(buffer))
+	if _, err := img.AutoRotate(); err != nil {
 		return nil, nil, err
 	}
 

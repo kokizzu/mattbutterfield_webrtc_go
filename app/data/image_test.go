@@ -12,10 +12,11 @@ func TestGetImage(t *testing.T) {
 		t.Fatal(err)
 	}
 	image := &Image{
-		ID:     "test.jpg",
-		Width:  100,
-		Height: 100,
-		Tags:   []Tag{},
+		ID:        "test.jpg",
+		PreviewID: "test_preview.jpg",
+		Width:     100,
+		Height:    100,
+		Tags:      []Tag{},
 	}
 	if err = s.SaveImage(image); err != nil {
 		t.Fatal(err)

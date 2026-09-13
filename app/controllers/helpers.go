@@ -90,7 +90,7 @@ func getImageInfo(image *data.Image) *imageInfo {
 	return &imageInfo{
 		ImageID:       image.ID,
 		ImagePath:     makeImagePath(image.ID),
-		ImageURL:      lib.ImagesBaseURL + image.ID,
+		ImageURL:      lib.ImagesBaseURL + image.PreviewID,
 		ImageWidth:    image.Width,
 		ImageHeight:   image.Height,
 		ImageCaption:  image.Caption,

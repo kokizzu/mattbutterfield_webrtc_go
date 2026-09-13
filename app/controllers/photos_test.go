@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/m-butterfield/mattbutterfield.com/app/data"
+	"github.com/m-butterfield/mattbutterfield.com/app/lib"
 )
 
 func TestPhotos(t *testing.T) {
@@ -68,7 +69,7 @@ func TestPhotoFilters(t *testing.T) {
 				if filter != tc.active || !actualBefore.Equal(before) || limit != 20 {
 					t.Fatalf("Unexpected query: filter=%s before=%s limit=%d", filter, actualBefore, limit)
 				}
-				return []*data.Image{{ID: "filtered.jpg", Width: 100, Height: 100, CreatedAt: createdAt}}, nil
+				return []*data.Image{{ID: "filtered.jpg", PreviewID: "preview.jpg", Width: 100, Height: 100, CreatedAt: createdAt}}, nil
 			}
 			ds = &testStore{
 				getImages: func(before time.Time, limit int) ([]*data.Image, error) {
@@ -94,6 +95,12 @@ func TestPhotoFilters(t *testing.T) {
 				t.Fatalf("Unexpected response: status=%d query calls=%d", w.Code, calls)
 			}
 			body := w.Body.String()
+			if !strings.Contains(body, `src="`+lib.ImagesBaseURL+`preview.jpg"`) {
+				t.Error("Missing preview image")
+			}
+			if !strings.Contains(body, `href="`+makeImagePath("filtered.jpg")+`"`) {
+				t.Error("Image link must use the original ID")
+			}
 			_, filters, found := strings.Cut(body, `<nav class="photo-filters" aria-label="Photo filters">`)
 			filters, _, closed := strings.Cut(filters, "</nav>")
 			if !found || !closed {

@@ -6,11 +6,13 @@ import (
 	"github.com/m-butterfield/mattbutterfield.com/app/lib"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 )
 
 func TestHome(t *testing.T) {
 	imageID := lib.HomeImage
+	previewID := "preview.jpg"
 	randImageID := "blerp"
 	getImageCalled, randomCalled := 0, 0
 	ds = &testStore{
@@ -19,7 +21,7 @@ func TestHome(t *testing.T) {
 			if id != imageID {
 				t.Errorf("GetImage called with unexpected image id: %s", id)
 			}
-			return &data.Image{ID: imageID}, nil
+			return &data.Image{ID: imageID, PreviewID: previewID}, nil
 		},
 		getRandomImage: func() (*data.Image, error) {
 			randomCalled += 1
@@ -39,6 +41,9 @@ func TestHome(t *testing.T) {
 	}
 	if w.Code != http.StatusOK {
 		t.Errorf("Unexpected return code: %d", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), `src="`+lib.ImagesBaseURL+previewID+`"`) {
+		t.Error("Image page must display the preview")
 	}
 }
 

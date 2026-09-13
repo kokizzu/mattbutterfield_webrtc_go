@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/m-butterfield/mattbutterfield.com/app/data"
+	"github.com/m-butterfield/mattbutterfield.com/app/lib"
 )
 
 func TestEditImage(t *testing.T) {
@@ -15,10 +16,11 @@ func TestEditImage(t *testing.T) {
 	ds = &testStore{
 		getImage: func(id string) (*data.Image, error) {
 			return &data.Image{
-				ID:      imageID,
-				Caption: "test caption",
-				Width:   100,
-				Height:  200,
+				ID:        imageID,
+				PreviewID: "preview.jpg",
+				Caption:   "test caption",
+				Width:     100,
+				Height:    200,
 			}, nil
 		},
 		getAllTags: func() ([]*data.Tag, error) {
@@ -38,6 +40,12 @@ func TestEditImage(t *testing.T) {
 
 	if w.Code != http.StatusOK {
 		t.Errorf("Unexpected return code: %d", w.Code)
+	}
+	if !strings.Contains(w.Body.String(), `src="`+lib.ImagesBaseURL+`preview.jpg"`) {
+		t.Error("Edit page must display the preview")
+	}
+	if !strings.Contains(w.Body.String(), `id="image-id" value="`+encodeImageID(imageID)+`"`) {
+		t.Error("Edit form must use the original ID")
 	}
 }
 
