@@ -77,6 +77,16 @@ code {
   tab-size: 4;
 }
 
+.photo-filters {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.photo-filters [aria-current="page"] {
+	font-weight: bold;
+  text-decoration: none;
+}
+
 .image-div {
   margin-top: 50px;
   margin-bottom: 160px;

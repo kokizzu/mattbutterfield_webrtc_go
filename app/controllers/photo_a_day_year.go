@@ -2,14 +2,15 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/m-butterfield/mattbutterfield.com/app/data"
-	"github.com/m-butterfield/mattbutterfield.com/app/lib"
-	"github.com/m-butterfield/mattbutterfield.com/app/static"
 	"io/fs"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	"github.com/m-butterfield/mattbutterfield.com/app/data"
+	"github.com/m-butterfield/mattbutterfield.com/app/lib"
+	"github.com/m-butterfield/mattbutterfield.com/app/static"
 )
 
 func photoADayYear(c *gin.Context) {
@@ -41,7 +42,7 @@ func photoADayYear(c *gin.Context) {
 
 	nextURL := ""
 	if len(images) > 0 {
-		nextURL = fmt.Sprintf("/photoaday/%d?before=%d#photos", year, images[len(images)-1].CreatedAt.Unix())
+		nextURL = fmt.Sprintf("/photoaday/%d?before=%d", year, images[len(images)-1].CreatedAt.Unix())
 	}
 
 	body, err := templateRender(yearPath, &photosPage{

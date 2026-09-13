@@ -55,7 +55,7 @@ func tagImages(c *gin.Context) {
 
 	nextURL := ""
 	if len(images) > 0 {
-		nextURL = fmt.Sprintf("/tag/%s?before=%d#photos", raw, images[len(images)-1].CreatedAt.Unix())
+		nextURL = fmt.Sprintf("/tag/%s?before=%d", raw, images[len(images)-1].CreatedAt.Unix())
 	}
 
 	body, err := templateRender("photos/index", &photosPage{
