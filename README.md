@@ -6,7 +6,7 @@ My personal website.
 
 ## Local
 
-The main dependencies are: Postgres (version 13 to match CloudSQL), Go 1.23+, Docker, and Node. Install as usual with homebrew, etc...
+The main dependencies are: Postgres (version 13 to match CloudSQL), Go, Docker, and Node. Install as usual with homebrew, etc...
 
 To run locally on OSX, you'll need some extras installed:
 
@@ -16,7 +16,7 @@ To run locally on OSX, you'll need some extras installed:
 
 Plus some environment variables set:
 
-    export CGO_LDFLAGS="-L/opt/homebrew/opt/lame/lib" 
+    export CGO_LDFLAGS="-L/opt/homebrew/opt/lame/lib"
     export CGO_CFLAGS="-I/opt/homebrew/opt/lame/include"
 
 Then try running:
