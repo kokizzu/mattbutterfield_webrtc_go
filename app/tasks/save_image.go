@@ -1,7 +1,6 @@
 package tasks
 
 import (
-	"bytes"
 	"context"
 	"crypto/sha256"
 	"fmt"
@@ -10,8 +9,8 @@ import (
 	"math"
 
 	"cloud.google.com/go/storage"
+	"github.com/davidbyttow/govips/v2/vips"
 	"github.com/gin-gonic/gin"
-	"github.com/h2non/bimg"
 	"github.com/m-butterfield/mattbutterfield.com/app/data"
 	"github.com/m-butterfield/mattbutterfield.com/app/lib"
 )
@@ -128,19 +127,23 @@ func readImage(ctx context.Context, obj *storage.ObjectHandle) ([]byte, error) {
 	return io.ReadAll(reader)
 }
 
-func processImage(buffer []byte) (*bimg.ImageSize, []byte, error) {
+func processImage(buffer []byte) (*vips.ImageMetadata, []byte, error) {
 	// Keep the uploaded bytes intact, including metadata, for original storage.
-	img := bimg.NewImage(bytes.Clone(buffer))
-	if _, err := img.AutoRotate(); err != nil {
-		return nil, nil, err
-	}
-
-	size, err := img.Size()
+	img, err := vips.NewImageFromBuffer(buffer)
 	if err != nil {
 		return nil, nil, err
 	}
-	width := size.Width
-	height := size.Height
+	defer img.Close()
+
+	// govips transforms decoded pixels; JPEG is encoded only at final export.
+	if err := img.AutoRotate(); err != nil {
+		return nil, nil, err
+	}
+	if err := img.TransformICCProfile(vips.SRGBIEC6196621ICCProfilePath); err != nil {
+		return nil, nil, err
+	}
+	sourceWidth, sourceHeight := img.Width(), img.Height()
+	width, height := sourceWidth, sourceHeight
 
 	if width > maxWidth {
 		ratio := float64(height) / float64(width)
@@ -153,18 +156,26 @@ func processImage(buffer []byte) (*bimg.ImageSize, []byte, error) {
 		width = int(math.Round(float64(height) * ratio))
 	}
 
-	imgData, err := img.Process(bimg.Options{
-		Width:   width,
-		Height:  height,
-		Quality: 98,
-	})
+	width, height = max(1, width), max(1, height)
+	if width != sourceWidth || height != sourceHeight {
+		// Match the rounded target dimensions on both axes.
+		if err := img.ResizeWithVScale(float64(width)/float64(sourceWidth),
+			float64(height)/float64(sourceHeight), vips.KernelLanczos3); err != nil {
+			return nil, nil, err
+		}
+	}
+	// Screen sharpening: sigma=0.5, X1=2, M2=2; defaults M1=0, Y2=10, Y3=20.
+	if err := img.Sharpen(0.5, 2, 2); err != nil {
+		return nil, nil, err
+	}
+	params := vips.NewJpegExportParams()
+	params.Quality = 95
+	params.OptimizeCoding = true
+	imgData, metadata, err := img.ExportJpeg(params)
 	if err != nil {
 		return nil, nil, err
 	}
-	return &bimg.ImageSize{
-		Width:  width,
-		Height: height,
-	}, imgData, nil
+	return metadata, imgData, nil
 }
 
 func getHash(data []byte) (string, error) {

@@ -6,7 +6,7 @@ My personal website.
 
 ## Local
 
-The main dependencies are: Postgres (version 13 to match CloudSQL), Go, Docker, and Node. Install as usual with homebrew, etc...
+The main dependencies are: Postgres (version 13 to match CloudSQL), Go 1.23+, Docker, and Node. Install as usual with homebrew, etc...
 
 To run locally on OSX, you'll need some extras installed:
 
@@ -82,4 +82,3 @@ Running `make deploy` will build the docker images, push them to GCR and deploy 
 Connecting to the Cloud SQL instance will get you into a `psql` shell where you can edit the schema and data as needed:
 
     gcloud beta sql connect mattbutterfield --user=mattbutterfield --database=mattbutterfield --quiet
-
