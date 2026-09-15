@@ -76,6 +76,9 @@ type imageInfo struct {
 	ImageCaption     string
 	ImageDate        string
 	ImageLocation    string
+	ImageFilm        string
+	ImageCamera      string
+	ImageLens        string
 	EditID           string
 	EditImagePath    string
 	ImageTags        []*data.Tag
@@ -98,6 +101,9 @@ func getImageInfo(image *data.Image) *imageInfo {
 		ImageCaption:     image.Caption,
 		ImageDate:        image.CreatedAt.Format(dateDisplayLayout),
 		ImageLocation:    image.Location,
+		ImageCamera:      image.Camera,
+		ImageLens:        image.Lens,
+		ImageFilm:        image.Film,
 		EditID:           encodedID,
 		EditImagePath:    "/admin/edit_image/" + encodedID,
 		ImageTags:        tags,

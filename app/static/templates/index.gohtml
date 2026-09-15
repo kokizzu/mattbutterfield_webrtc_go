@@ -8,6 +8,15 @@
   <p>{{ .ImageCaption }}</p>
   <p>{{ .ImageLocation }}</p>
   <p>{{ .ImageDate }}</p>
+  {{ if .ImageCamera }}
+    {{ .ImageCamera }}
+  {{ end }}
+  {{ if .ImageLens }}
+    | {{ .ImageLens }}
+  {{ end }}
+  {{ if .ImageFilm }}
+    | {{ .ImageFilm }}
+  {{ end }}
   {{ if .ImageTags }}
   <p>tags:
     {{ range $i, $tag := .ImageTags }}{{ if $i }}, {{ end }}<a href="/tag/{{ .Name | urlquery }}">{{ .Name }}</a>{{ end }}

@@ -12,6 +12,7 @@ type Tag struct {
 func (s *ds) GetImagesByTag(names []string, before time.Time, limit int) ([]*Image, error) {
 	var images []*Image
 	tx := s.db.
+		Preload("Tags").
 		Joins("JOIN image_tags ON image_tags.image_id = images.id").
 		Where("image_tags.tag_name IN ?", names).
 		Where("created_at < ?", before).

@@ -1,8 +1,9 @@
 package data
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type Image struct {
@@ -31,6 +32,7 @@ func (s *ds) GetImage(id string) (*Image, error) {
 func (s *ds) GetImages(before time.Time, limit int) ([]*Image, error) {
 	var images []*Image
 	tx := s.db.
+		Preload("Tags").
 		Where("created_at < $1", before).
 		Order("created_at DESC").
 		Limit(limit).
